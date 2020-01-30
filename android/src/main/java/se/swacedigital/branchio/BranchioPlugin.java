@@ -6,6 +6,9 @@ import android.content.Intent;
 
 import androidx.annotation.NonNull;
 import org.json.JSONObject;
+
+import java.util.HashMap;
+import java.util.Iterator;
 import java.util.Map;
 import io.branch.referral.util.BranchEvent;
 import io.flutter.Log;
@@ -136,8 +139,19 @@ public class BranchioPlugin implements FlutterPlugin, MethodCallHandler, EventCh
     event.logEvent(applicationContext);
   }
 
-  private JSONObject latestReferringParams() {
-    return Branch.getInstance().getLatestReferringParams();
+  private Map<String, Object> latestReferringParams() {
+    final Map<String, Object> values = new HashMap();
+    final JSONObject json = Branch.getInstance().getLatestReferringParams();
+    final Iterator<String> iterator = json.keys();
+    while(iterator.hasNext()) {
+      String key = iterator.next();
+      try {
+        values.put(key, json.get(key));
+      }catch(Exception e) {
+        Log.i("BRANCH SDK", "Unable to add entry to map: " + e);
+      }
+    }
+    return values;
   }
 
 
