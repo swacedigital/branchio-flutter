@@ -1,0 +1,31 @@
+PODS:
+  - Branch (0.31.3):
+    - Branch/Core (= 0.31.3)
+  - Branch/Core (0.31.3)
+  - branchio (0.0.1):
+    - Branch (~> 0.31.3)
+    - Flutter
+  - Flutter (1.0.0)
+
+DEPENDENCIES:
+  - branchio (from `.symlinks/plugins/branchio/ios`)
+  - Flutter (from `Flutter`)
+
+SPEC REPOS:
+  trunk:
+    - Branch
+
+EXTERNAL SOURCES:
+  branchio:
+    :path: ".symlinks/plugins/branchio/ios"
+  Flutter:
+    :path: Flutter
+
+SPEC CHECKSUMS:
+  Branch: 9b299693ee54b308ff8c18146afe1f711c2069ec
+  branchio: 825b3ee5f91c64d2daafde2b0d6385a4566a811c
+  Flutter: 0e3d915762c693b495b44d77113d4970485de6ec
+
+PODFILE CHECKSUM: 3dbe063e9c90a5d7c9e4e76e70a821b9e2c1d271
+
+COCOAPODS: 1.8.4
