@@ -10,7 +10,7 @@ import java.util.Map;
 import io.branch.referral.util.BranchEvent;
 import io.flutter.Log;
 import io.flutter.embedding.engine.plugins.FlutterPlugin;
-import io.flutter.embedding.engine.plugins.activity.ActivityAware;
+import io.flutter.embedding.engine.plugins.activity.ActivityPluginBinding;
 import io.flutter.plugin.common.EventChannel;
 import io.flutter.plugin.common.MethodCall;
 import io.flutter.plugin.common.MethodChannel;
@@ -22,7 +22,7 @@ import io.branch.referral.Branch;
 import io.branch.referral.BranchError;
 
 /** BranchioPlugin */
-public class BranchioPlugin implements FlutterPlugin, MethodCallHandler, EventChannel.StreamHandler, PluginRegistry.NewIntentListener, ActivityAware {
+public class BranchioPlugin implements FlutterPlugin, MethodCallHandler, EventChannel.StreamHandler, PluginRegistry.NewIntentListener {
 
   private static final String BranchFlutterInitialize = "init";
   private static final String BranchFlutterSetIdentity = "setIdentity";
@@ -56,7 +56,7 @@ public class BranchioPlugin implements FlutterPlugin, MethodCallHandler, EventCh
   // depending on the user's project. onAttachedToEngine or registerWith must both be defined
   // in the same class.
   public static void registerWith(Registrar registrar) {
-    final MethodChannel channel = new MethodChannel(registrar.messenger(), "branchio");
+    final MethodChannel channel = new MethodChannel(registrar.messenger(), "plugins.swace.se/branchio");
     final BranchioPlugin instance = new BranchioPlugin();
     channel.setMethodCallHandler(instance);
     instance.eventChannel = new EventChannel(registrar.messenger(), "plugins.swace.se/branchio-events");
@@ -139,6 +139,7 @@ public class BranchioPlugin implements FlutterPlugin, MethodCallHandler, EventCh
   private JSONObject latestReferringParams() {
     return Branch.getInstance().getLatestReferringParams();
   }
+
 
   @Override
   public void onListen(Object arguments, EventChannel.EventSink events) {
