@@ -142,6 +142,7 @@ public class BranchioPlugin implements FlutterPlugin, MethodCallHandler, EventCh
   private Map<String, Object> latestReferringParams() {
     final Map<String, Object> values = new HashMap();
     final JSONObject json = Branch.getInstance().getLatestReferringParams();
+    if (json == null) return null;
     final Iterator<String> iterator = json.keys();
     while(iterator.hasNext()) {
       String key = iterator.next();
