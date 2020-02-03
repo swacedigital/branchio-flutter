@@ -4,6 +4,8 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 
+import android.app.Activity;
+
 import androidx.annotation.NonNull;
 import org.json.JSONObject;
 
@@ -13,6 +15,7 @@ import java.util.Map;
 import io.branch.referral.util.BranchEvent;
 import io.flutter.Log;
 import io.flutter.embedding.engine.plugins.FlutterPlugin;
+import io.flutter.embedding.engine.plugins.activity.ActivityAware;
 import io.flutter.embedding.engine.plugins.activity.ActivityPluginBinding;
 import io.flutter.plugin.common.EventChannel;
 import io.flutter.plugin.common.MethodCall;
@@ -24,8 +27,9 @@ import io.flutter.plugin.common.PluginRegistry.Registrar;
 import io.branch.referral.Branch;
 import io.branch.referral.BranchError;
 
+
 /** BranchioPlugin */
-public class BranchioPlugin implements FlutterPlugin, MethodCallHandler, EventChannel.StreamHandler, PluginRegistry.NewIntentListener {
+public class BranchioPlugin implements FlutterPlugin, MethodCallHandler, EventChannel.StreamHandler, PluginRegistry.NewIntentListener, ActivityAware {
 
   private static final String BranchFlutterInitialize = "init";
   private static final String BranchFlutterSetIdentity = "setIdentity";
@@ -33,11 +37,11 @@ public class BranchioPlugin implements FlutterPlugin, MethodCallHandler, EventCh
   private static final String BranchFlutterLatestReferringParams = "latestReferringParams";
   private static final String BranchFlutterUnsetIdentity = "unsetIdentity";
 
-  private Branch.BranchReferralInitListener branchReferralInitListener;
   private EventChannel eventChannel;
   private EventChannel.EventSink sink;
   private BroadcastReceiver broadcastReceiver;
   private Context applicationContext;
+  private Activity activity;
 
   @Override
   public void onAttachedToEngine(@NonNull FlutterPluginBinding flutterPluginBinding) {
@@ -109,17 +113,20 @@ public class BranchioPlugin implements FlutterPlugin, MethodCallHandler, EventCh
     if(isTest) Branch.enableTestMode();
     if(debug) Branch.enableDebugMode();
 
-    Branch.getAutoInstance(applicationContext).initSession(new Branch.BranchReferralInitListener() {
-      @Override
-      public void onInitFinished(JSONObject referringParams, BranchError error) {
-        if (error == null) {
-          Log.i("BRANCH SDK", referringParams.toString());
-        } else {
-          Log.i("BRANCH SDK", error.getMessage());
-        }
-      }
-    });
+    Branch.getAutoInstance(applicationContext).initSession(branchReferralInitListener);
   }
+
+  private Branch.BranchReferralInitListener branchReferralInitListener = new Branch.BranchReferralInitListener() {
+                @Override
+                public void onInitFinished(JSONObject referringParams, BranchError error) {
+                  if (error == null) {
+                    Log.i("BRANCH SDK", referringParams.toString());
+                  } else {
+                    Log.i("BRANCH SDK", error.getMessage());
+                  }
+                }
+            };
+
 
   private void setIdentity(String userId) {
     Branch.getInstance().setIdentity(userId);
@@ -168,7 +175,24 @@ public class BranchioPlugin implements FlutterPlugin, MethodCallHandler, EventCh
 
   @Override
   public boolean onNewIntent(Intent intent) {
+    Branch.getInstance().reInitSession(this.activity, branchReferralInitListener);
     sink.success(latestReferringParams());
     return false;
+  }
+
+  public void onAttachedToActivity(@NonNull ActivityPluginBinding binding) {
+    this.activity = binding.getActivity();
+  }
+
+  public void onDetachedFromActivity() {
+    this.activity = null;
+  }
+
+  public void onDetachedFromActivityForConfigChanges() {
+    this.activity = null;
+  }
+
+  public void onReattachedToActivityForConfigChanges(@NonNull ActivityPluginBinding binding) {
+    this.activity = binding.getActivity();
   }
 }
