@@ -137,8 +137,8 @@ public class BranchioPlugin implements FlutterPlugin, MethodCallHandler, EventCh
                 public void onInitFinished(JSONObject referringParams, BranchError error) {
                   if (error == null) {
                     Log.i("BRANCH SDK", referringParams.toString());
-                    if(this.sink != null) {
-                      this.sink.success(jsonObjectToHash(referringParams));
+                    if(sink != null) {
+                      sink.success(jsonObjectToHash(referringParams));
                     }
                   } else {
                     Log.i("BRANCH SDK", error.getMessage());
