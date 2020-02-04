@@ -74,6 +74,7 @@ public class BranchioPlugin implements FlutterPlugin, MethodCallHandler, EventCh
 
   @Override
   public void onMethodCall(@NonNull MethodCall call, @NonNull Result result) {
+    Log.wtf("WTF:", "logging shit");
     if (call.method.equals(BranchFlutterInitialize)) {
       final boolean isTest = call.argument("is_test");
       final boolean debug = call.argument("debug");
@@ -116,11 +117,29 @@ public class BranchioPlugin implements FlutterPlugin, MethodCallHandler, EventCh
     Branch.getAutoInstance(applicationContext).initSession(branchReferralInitListener);
   }
 
+  private Map<String, Object> jsonObjectToHash(JSONObject json) {
+    if (json == null) return null;
+    final Map<String, Object> values = new HashMap();
+    final Iterator<String> iterator = json.keys();
+    while(iterator.hasNext()) {
+      String key = iterator.next();
+      try {
+        values.put(key, json.get(key));
+      }catch(Exception e) {
+        Log.i("BRANCH SDK", "Unable to add entry to map: " + e);
+      }
+    }
+    return values;
+  }
+
   private Branch.BranchReferralInitListener branchReferralInitListener = new Branch.BranchReferralInitListener() {
                 @Override
                 public void onInitFinished(JSONObject referringParams, BranchError error) {
                   if (error == null) {
                     Log.i("BRANCH SDK", referringParams.toString());
+                    if(this.sink != null) {
+                      this.sink.success(jsonObjectToHash(referringParams));
+                    }
                   } else {
                     Log.i("BRANCH SDK", error.getMessage());
                   }
@@ -149,17 +168,7 @@ public class BranchioPlugin implements FlutterPlugin, MethodCallHandler, EventCh
   private Map<String, Object> latestReferringParams() {
     final Map<String, Object> values = new HashMap();
     final JSONObject json = Branch.getInstance().getLatestReferringParams();
-    if (json == null) return null;
-    final Iterator<String> iterator = json.keys();
-    while(iterator.hasNext()) {
-      String key = iterator.next();
-      try {
-        values.put(key, json.get(key));
-      }catch(Exception e) {
-        Log.i("BRANCH SDK", "Unable to add entry to map: " + e);
-      }
-    }
-    return values;
+    return jsonObjectToHash(json);
   }
 
 
@@ -181,18 +190,22 @@ public class BranchioPlugin implements FlutterPlugin, MethodCallHandler, EventCh
   }
 
   public void onAttachedToActivity(@NonNull ActivityPluginBinding binding) {
+    Log.wtf("WTF:", "logging shit");
     this.activity = binding.getActivity();
   }
 
   public void onDetachedFromActivity() {
+    Log.wtf("WTF:", "logging shit");
     this.activity = null;
   }
 
   public void onDetachedFromActivityForConfigChanges() {
+    Log.wtf("WTF:", "logging shit");
     this.activity = null;
   }
 
   public void onReattachedToActivityForConfigChanges(@NonNull ActivityPluginBinding binding) {
+    Log.wtf("WTF:", "logging shit");
     this.activity = binding.getActivity();
   }
 }
