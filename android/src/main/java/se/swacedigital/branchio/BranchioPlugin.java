@@ -74,7 +74,6 @@ public class BranchioPlugin implements FlutterPlugin, MethodCallHandler, EventCh
 
   @Override
   public void onMethodCall(@NonNull MethodCall call, @NonNull Result result) {
-    Log.wtf("WTF:", "logging shit");
     if (call.method.equals(BranchFlutterInitialize)) {
       final boolean isTest = call.argument("is_test");
       final boolean debug = call.argument("debug");
@@ -190,22 +189,18 @@ public class BranchioPlugin implements FlutterPlugin, MethodCallHandler, EventCh
   }
 
   public void onAttachedToActivity(@NonNull ActivityPluginBinding binding) {
-    Log.wtf("WTF:", "logging shit");
     this.activity = binding.getActivity();
   }
 
   public void onDetachedFromActivity() {
-    Log.wtf("WTF:", "logging shit");
     this.activity = null;
   }
 
   public void onDetachedFromActivityForConfigChanges() {
-    Log.wtf("WTF:", "logging shit");
     this.activity = null;
   }
 
   public void onReattachedToActivityForConfigChanges(@NonNull ActivityPluginBinding binding) {
-    Log.wtf("WTF:", "logging shit");
     this.activity = binding.getActivity();
   }
 }
