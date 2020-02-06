@@ -149,11 +149,11 @@ public class BranchioPlugin implements FlutterPlugin, MethodCallHandler, EventCh
 
 
   private void setIdentity(String userId) {
-    Branch.getInstance().setIdentity(userId);
+    Branch.getInstance(applicationContext).setIdentity(userId);
   }
 
   private void unsetIdentity() {
-    Branch.getInstance().logout();
+    Branch.getInstance(applicationContext).logout();
   }
 
   private void logEvent(String name, Map<String, String> params) {
@@ -167,7 +167,7 @@ public class BranchioPlugin implements FlutterPlugin, MethodCallHandler, EventCh
   }
 
   private Map<String, Object> latestReferringParams() {
-    final JSONObject json = Branch.getInstance().getLatestReferringParams();
+    final JSONObject json = Branch.getInstance(applicationContext).getLatestReferringParams();
     return jsonObjectToHash(json);
   }
 
@@ -185,7 +185,7 @@ public class BranchioPlugin implements FlutterPlugin, MethodCallHandler, EventCh
   @Override
   public boolean onNewIntent(Intent intent) {
     if(activity != null && branchReferralInitListener != null) {
-      final boolean reinitialized = Branch.getInstance().reInitSession(activity, branchReferralInitListener);
+      final boolean reinitialized = Branch.getInstance(applicationContext).reInitSession(activity, branchReferralInitListener);
       if(reinitialized) {
         sink.success(latestReferringParams());
       }
