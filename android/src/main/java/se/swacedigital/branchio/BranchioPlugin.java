@@ -186,7 +186,7 @@ public class BranchioPlugin implements FlutterPlugin, MethodCallHandler, EventCh
   public boolean onNewIntent(Intent intent) {
     if(activity != null && branchReferralInitListener != null) {
       final boolean reinitialized = Branch.getInstance(applicationContext).reInitSession(activity, branchReferralInitListener);
-      if(reinitialized) {
+      if(reinitialized && sink != null) {
         sink.success(latestReferringParams());
       }
     }
