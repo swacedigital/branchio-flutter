@@ -35,5 +35,6 @@ android {
 
 dependencies {
     implementation "io.branch.sdk.android:library:4.+"
+    implementation 'com.android.installreferrer:installreferrer:1.0'
     implementation 'com.google.firebase:firebase-appindexing:17.1.0'
 }
