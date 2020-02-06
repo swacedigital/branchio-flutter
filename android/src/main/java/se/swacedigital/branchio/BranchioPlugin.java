@@ -17,6 +17,7 @@ import io.flutter.Log;
 import io.flutter.embedding.engine.plugins.FlutterPlugin;
 import io.flutter.embedding.engine.plugins.activity.ActivityAware;
 import io.flutter.embedding.engine.plugins.activity.ActivityPluginBinding;
+import io.flutter.plugin.common.BinaryMessenger;
 import io.flutter.plugin.common.EventChannel;
 import io.flutter.plugin.common.MethodCall;
 import io.flutter.plugin.common.MethodChannel;
@@ -45,12 +46,7 @@ public class BranchioPlugin implements FlutterPlugin, MethodCallHandler, EventCh
 
   @Override
   public void onAttachedToEngine(@NonNull FlutterPluginBinding flutterPluginBinding) {
-    final MethodChannel channel = new MethodChannel(flutterPluginBinding.getFlutterEngine().getDartExecutor(), "plugins.swace.se/branchio");
-    final BranchioPlugin instance = new BranchioPlugin();
-    channel.setMethodCallHandler(instance);
-    instance.eventChannel = new EventChannel(flutterPluginBinding.getBinaryMessenger(), "plugins.swace.se/branchio-events");
-    instance.eventChannel.setStreamHandler(instance);
-    instance.setContext(flutterPluginBinding.getApplicationContext());
+    BranchioPlugin.setup(flutterPluginBinding.getApplicationContext(), flutterPluginBinding.getBinaryMessenger());
   }
 
   // This static function is optional and equivalent to onAttachedToEngine. It supports the old
@@ -63,13 +59,8 @@ public class BranchioPlugin implements FlutterPlugin, MethodCallHandler, EventCh
   // depending on the user's project. onAttachedToEngine or registerWith must both be defined
   // in the same class.
   public static void registerWith(Registrar registrar) {
-    final MethodChannel channel = new MethodChannel(registrar.messenger(), "plugins.swace.se/branchio");
-    final BranchioPlugin instance = new BranchioPlugin();
-    channel.setMethodCallHandler(instance);
-    instance.eventChannel = new EventChannel(registrar.messenger(), "plugins.swace.se/branchio-events");
-    instance.eventChannel.setStreamHandler(instance);
+    BranchioPlugin instance = BranchioPlugin.setup(registrar.activity().getApplicationContext(), registrar.messenger());
     registrar.addNewIntentListener(instance);
-    instance.setContext(registrar.activity().getApplicationContext());
   }
 
   @Override
@@ -102,6 +93,17 @@ public class BranchioPlugin implements FlutterPlugin, MethodCallHandler, EventCh
     applicationContext = null;
     eventChannel.setStreamHandler(null);
     eventChannel = null;
+  }
+
+  private static BranchioPlugin setup(Context context, BinaryMessenger messenger) {
+    final MethodChannel channel = new MethodChannel(messenger, "plugins.swace.se/branchio");
+    final EventChannel eventChannel = new EventChannel(messenger, "plugins.swace.se/branchio-events");
+    final BranchioPlugin instance = new BranchioPlugin();
+    channel.setMethodCallHandler(instance);
+    eventChannel.setStreamHandler(instance);
+    instance.eventChannel = eventChannel;
+    instance.setContext(context);
+    return instance;
   }
 
   private void setContext(Context context) {
@@ -165,7 +167,6 @@ public class BranchioPlugin implements FlutterPlugin, MethodCallHandler, EventCh
   }
 
   private Map<String, Object> latestReferringParams() {
-    final Map<String, Object> values = new HashMap();
     final JSONObject json = Branch.getInstance().getLatestReferringParams();
     return jsonObjectToHash(json);
   }
@@ -173,34 +174,40 @@ public class BranchioPlugin implements FlutterPlugin, MethodCallHandler, EventCh
 
   @Override
   public void onListen(Object arguments, EventChannel.EventSink events) {
-    this.sink = events;
+    sink = events;
   }
 
   @Override
   public void onCancel(Object arguments) {
-    applicationContext.unregisterReceiver(broadcastReceiver);
+    sink = null;
   }
 
   @Override
   public boolean onNewIntent(Intent intent) {
-    Branch.getInstance().reInitSession(this.activity, branchReferralInitListener);
-    sink.success(latestReferringParams());
+    if(activity != null && branchReferralInitListener != null) {
+      final boolean reinitialized = Branch.getInstance().reInitSession(activity, branchReferralInitListener);
+      if(reinitialized) {
+        sink.success(latestReferringParams());
+      }
+    }
     return false;
   }
 
   public void onAttachedToActivity(@NonNull ActivityPluginBinding binding) {
-    this.activity = binding.getActivity();
+    binding.addOnNewIntentListener(this);
+    activity = binding.getActivity();
   }
 
   public void onDetachedFromActivity() {
-    this.activity = null;
+    activity = null;
   }
 
   public void onDetachedFromActivityForConfigChanges() {
-    this.activity = null;
+    activity = null;
   }
 
   public void onReattachedToActivityForConfigChanges(@NonNull ActivityPluginBinding binding) {
-    this.activity = binding.getActivity();
+    binding.addOnNewIntentListener(this);
+    activity = binding.getActivity();
   }
 }
